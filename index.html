@@ -1841,7 +1841,7 @@
 
         async function loadReviews() {
             try {
-                const res = await fetch('/api/edelwolke-reviews');
+                const res = await fetch('http://43.129.58.228:8899/api/edelwolke-reviews');
                 reviews = await res.json();
                 updateFileListBadges();
             } catch(e) { console.error('Error loading reviews:', e); }
@@ -1849,7 +1849,7 @@
 
         async function loadComments() {
             try {
-                const res = await fetch('/api/edelwolke-comments');
+                const res = await fetch('http://43.129.58.228:8899/api/edelwolke-comments');
                 comments = await res.json();
             } catch(e) {}
         }
@@ -1857,7 +1857,7 @@
         async function saveComment() {
             if (!currentFile) return;
             const text = document.getElementById('ceo-comment-box').value.trim();
-            await fetch('/api/edelwolke-comments', {
+            await fetch('http://43.129.58.228:8899/api/edelwolke-comments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ filename: currentFile, text })
@@ -1872,7 +1872,7 @@
 
         async function loadVariants(filePath) {
             try {
-                const res = await fetch('/api/edelwolke-variants?file=' + encodeURIComponent(filePath));
+                const res = await fetch('http://43.129.58.228:8899/api/edelwolke-variants?file=' + encodeURIComponent(filePath));
                 currentVariants = await res.json();
                 const bar = document.getElementById('edelwolke-variant-bar');
                 const btns = document.getElementById('edelwolke-variant-btns');
@@ -1903,7 +1903,7 @@
             const content = document.getElementById('edelwolke-file-content');
             content.textContent = 'Loading...';
             try {
-                const res = await fetch('/api/file-content?path=' + encodeURIComponent(filePath));
+                const res = await fetch('http://43.129.58.228:8899/api/file-content?path=' + encodeURIComponent(filePath));
                 const data = await res.json();
                 if (data.error) { content.textContent = 'Error: ' + data.error; }
                 else if (data.ext === '.csv') {
@@ -1964,7 +1964,7 @@
             }
             const noteEl = document.getElementById('review-note-input');
             const note = status === 'rejected' ? (noteEl.value || '') : '';
-            await fetch('/api/edelwolke-reviews', {
+            await fetch('http://43.129.58.228:8899/api/edelwolke-reviews', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ filename: currentFile, status, note })
@@ -1976,7 +1976,7 @@
 
         async function loadEdelwolkeFiles() {
             try {
-                const res = await fetch('/api/edelwolke-files');
+                const res = await fetch('http://43.129.58.228:8899/api/edelwolke-files');
                 const files = await res.json();
                 const listEl = document.getElementById('edelwolke-file-list');
                 if (!listEl) return;
@@ -2065,7 +2065,7 @@
             try {
                 const content = document.getElementById('edelwolke-file-content');
                 if (!content) return;
-                const res = await fetch('/api/file-content?path=' + encodedPath);
+                const res = await fetch('http://43.129.58.228:8899/api/file-content?path=' + encodedPath);
                 const data = await res.json();
                 if (data.error) {
                     content.textContent = 'Error: ' + data.error;
@@ -2107,7 +2107,7 @@
 
         async function loadIdeas() {
             try {
-                const res = await fetch('/api/content-ideas');
+                const res = await fetch('http://43.129.58.228:8899/api/content-ideas');
                 const ideas = await res.json();
                 const list = document.getElementById('ideas-list');
                 if (!ideas.length) {
@@ -2143,7 +2143,7 @@
             const category = document.getElementById('idea-category').value;
             const description = document.getElementById('idea-desc').value.trim();
             if (!title && !description) { alert('Judul atau deskripsi harus diisi'); return; }
-            await fetch('/api/content-ideas', {
+            await fetch('http://43.129.58.228:8899/api/content-ideas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ link, title, description, category })
@@ -2157,7 +2157,7 @@
 
         async function deleteIdea(id) {
             if (!confirm('Hapus ide ini?')) return;
-            await fetch('/api/content-ideas/' + id, { method: 'DELETE' });
+            await fetch('http://43.129.58.228:8899/api/content-ideas/' + id, { method: 'DELETE' });
             loadIdeas();
         }
 
@@ -2226,7 +2226,7 @@
 
         async function loadProjects() {
             try {
-                const res = await fetch('/api/projects');
+                const res = await fetch('http://43.129.58.228:8899/api/projects');
                 projectsData = await res.json();
                 renderProjects();
             } catch(e) { console.error('Error loading projects:', e); }
@@ -2284,14 +2284,14 @@
             const input = document.getElementById('note-input-' + idx);
             const text = input.value.trim();
             if (!text) return;
-            const res = await fetch('/api/projects/' + encodeURIComponent(name) + '/notes', {
+            const res = await fetch('http://43.129.58.228:8899/api/projects/' + encodeURIComponent(name) + '/notes', {
                 method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text})
             });
             if ((await res.json()).success) { input.value = ''; loadProjects(); }
         }
 
         async function deleteProjectNote(name, idx) {
-            const res = await fetch('/api/projects/' + encodeURIComponent(name) + '/notes/' + idx, { method: 'DELETE' });
+            const res = await fetch('http://43.129.58.228:8899/api/projects/' + encodeURIComponent(name) + '/notes/' + idx, { method: 'DELETE' });
             if ((await res.json()).success) loadProjects();
         }
 
@@ -2349,9 +2349,9 @@
             try {
                 let res;
                 if (originalName) {
-                    res = await fetch('/api/projects/' + encodeURIComponent(originalName), { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+                    res = await fetch('http://43.129.58.228:8899/api/projects/' + encodeURIComponent(originalName), { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
                 } else {
-                    res = await fetch('/api/projects', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+                    res = await fetch('http://43.129.58.228:8899/api/projects', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
                 }
                 const result = await res.json();
                 if (result.success) { closeProjectModal(); loadProjects(); }
@@ -2364,7 +2364,7 @@
             const text = input.value.trim();
             if (!text) return;
             try {
-                const res = await fetch('/api/projects/' + encodeURIComponent(projectsData[index].name) + '/notes', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text}) });
+                const res = await fetch('http://43.129.58.228:8899/api/projects/' + encodeURIComponent(projectsData[index].name) + '/notes', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text}) });
                 const result = await res.json();
                 if (result.success) { input.value = ''; loadProjects(); }
                 else { alert('Error: ' + (result.error || 'Unknown')); }
@@ -2372,7 +2372,7 @@
         }
         async function deleteNote(projectIndex, noteIndex) {
             try {
-                await fetch('/api/projects/' + encodeURIComponent(projectsData[projectIndex].name) + '/notes/' + noteIndex, { method: 'DELETE' });
+                await fetch('http://43.129.58.228:8899/api/projects/' + encodeURIComponent(projectsData[projectIndex].name) + '/notes/' + noteIndex, { method: 'DELETE' });
                 loadProjects();
             } catch(e) { alert('Error: ' + e.message); }
         }
@@ -2383,7 +2383,7 @@
             const name = document.getElementById('project-edit-original-name').value;
             if (!name) return;
             try {
-                const res = await fetch('/api/projects/' + encodeURIComponent(name) + '/notes', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text}) });
+                const res = await fetch('http://43.129.58.228:8899/api/projects/' + encodeURIComponent(name) + '/notes', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text}) });
                 const result = await res.json();
                 input.value = '';
                 // Update locally + update modal list immediately
@@ -2404,7 +2404,7 @@
             const name = document.getElementById('project-edit-original-name').value;
             if (!name) return;
             try {
-                await fetch('/api/projects/' + encodeURIComponent(name) + '/notes/' + noteIndex, { method: 'DELETE' });
+                await fetch('http://43.129.58.228:8899/api/projects/' + encodeURIComponent(name) + '/notes/' + noteIndex, { method: 'DELETE' });
                 // Update projectsData directly
                 const p = projectsData.find(x => x.name === name);
                 if (p && p.notes) { p.notes.splice(noteIndex, 1); }
@@ -2419,7 +2419,7 @@
         async function deleteProject(name) {
             if (!confirm('Hapus project "' + name + '"?')) return;
             try {
-                await fetch('/api/projects/' + encodeURIComponent(name), { method: 'DELETE' });
+                await fetch('http://43.129.58.228:8899/api/projects/' + encodeURIComponent(name), { method: 'DELETE' });
                 loadProjects();
             } catch(e) { alert('Error: ' + e.message); }
         }
@@ -2461,7 +2461,7 @@
         }
 
         function loadNotes(){
-            fetch('/api/notes').then(r=>r.json()).then(notes=>{
+            fetch('http://43.129.58.228:8899/api/notes').then(r=>r.json()).then(notes=>{
                 const grid=document.getElementById('notes-grid');
                 document.getElementById('notes-count').textContent=notes.length+' notes';
                 if(!notes.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);"><div style="font-size:2rem;margin-bottom:8px;">📝</div><p>No notes yet.</p></div>';return;}
@@ -2516,7 +2516,7 @@
         }
 
         function loadBlogNotes(){
-            fetch('/api/blog-notes').then(r=>r.json()).then(notes=>{
+            fetch('http://43.129.58.228:8899/api/blog-notes').then(r=>r.json()).then(notes=>{
                 blogNotes = notes;
                 const sidebar = document.getElementById('notes-sidebar');
                 if(!notes.length){
@@ -2541,7 +2541,7 @@
             if(item) item.classList.add('active');
             const note = blogNotes[idx];
             if(!note) return;
-            fetch('/api/blog-notes/'+encodeURIComponent(note.filename)).then(r=>r.json()).then(d=>{
+            fetch('http://43.129.58.228:8899/api/blog-notes/'+encodeURIComponent(note.filename)).then(r=>r.json()).then(d=>{
                 const body = simpleMarkdown(d.content);
                 document.getElementById('notes-article').innerHTML =
                     `<div class="blog-article">
@@ -2561,12 +2561,12 @@
             document.getElementById('note-title').value='';
             document.getElementById('note-content').value='';
             document.querySelector('input[name="note-color"][value="green"]').checked=true;
-            if(id){fetch('/api/notes').then(r=>r.json()).then(notes=>{const n=notes.find(x=>x.id===id);if(n){document.getElementById('note-title').value=n.title;document.getElementById('note-content').value=n.content;const rb=document.querySelector('input[name="note-color"][value="'+(n.color||'green')+'"]');if(rb)rb.checked=true;}});}
+            if(id){fetch('http://43.129.58.228:8899/api/notes').then(r=>r.json()).then(notes=>{const n=notes.find(x=>x.id===id);if(n){document.getElementById('note-title').value=n.title;document.getElementById('note-content').value=n.content;const rb=document.querySelector('input[name="note-color"][value="'+(n.color||'green')+'"]');if(rb)rb.checked=true;}});}
             document.getElementById('note-modal').classList.add('active');
         }
         function closeNoteModal(){document.getElementById('note-modal').classList.remove('active');}
         function editNote(id){openNoteModal(id);}
-        function deleteNote(id){if(!confirm('Delete this note?'))return;fetch('/api/notes/'+id,{method:'DELETE'}).then(r=>r.json()).then(()=>loadNotes());}
+        function deleteNote(id){if(!confirm('Delete this note?'))return;fetch('http://43.129.58.228:8899/api/notes/'+id,{method:'DELETE'}).then(r=>r.json()).then(()=>loadNotes());}
         function saveNote(){
             const title=document.getElementById('note-title').value.trim();
             const content=document.getElementById('note-content').value.trim();
@@ -2579,7 +2579,7 @@
 
         // ===== JARVIS TAB =====
         function loadJarvisProgress(){
-            fetch('/api/jarvis/progress').then(r=>r.json()).then(d=>{
+            fetch('http://43.129.58.228:8899/api/jarvis/progress').then(r=>r.json()).then(d=>{
                 const pct=d.total?Math.round(d.done/d.total*100):0;
                 document.getElementById('jarvis-pct').textContent=pct+'%';
                 document.getElementById('jarvis-bar').style.width=pct+'%';
@@ -2591,7 +2591,7 @@
         }
         let jarvisRefreshInterval=null;
         function loadSystemStats(){
-            fetch('/api/system-stats').then(r=>r.json()).then(d=>{
+            fetch('http://43.129.58.228:8899/api/system-stats').then(r=>r.json()).then(d=>{
                 document.getElementById('stat-ram').textContent=(d.ram_free_mb||d.ram||'--')+' MB free';
                 document.getElementById('stat-disk').textContent=(d.disk_used_pct||d.disk||'--')+'% used';
                 document.getElementById('stat-docker').textContent=d.docker_running||d.docker||'--';
@@ -2618,13 +2618,13 @@
             el.innerHTML=jobs.map(j=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--bg-card);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);"><div style="display:flex;align-items:center;gap:10px;"><div style="font-size:1.2rem;">${j.icon||'⏰'}</div><div><div style="font-weight:600;font-size:0.85rem;">${j.name}</div><div style="font-size:0.75rem;color:var(--text-muted);">${j.schedule}</div></div></div><span style="font-size:0.7rem;padding:4px 10px;border-radius:20px;font-weight:600;background:${j.status==='active'?'var(--accent-soft)':'var(--red-soft)'};color:${j.status==='active'?'var(--accent)':'var(--red)'};">${j.status}</span></div>`).join('');
         }
         function loadCronJobs(){
-            fetch('/api/cron-jobs').then(r=>r.json()).then(jobs=>renderCronJobs(jobs)).catch(()=>renderCronJobs(defaultCronJobs));
+            fetch('http://43.129.58.228:8899/api/cron-jobs').then(r=>r.json()).then(jobs=>renderCronJobs(jobs)).catch(()=>renderCronJobs(defaultCronJobs));
         }
         function jarvisAction(a){
 
         function loadBusinessOverview(){
             const el=document.getElementById('business-overview');
-            fetch('/api/business-status').then(r=>r.json()).then(d=>{
+            fetch('http://43.129.58.228:8899/api/business-status').then(r=>r.json()).then(d=>{
                 if(!d||!d.businesses){el.innerHTML='<p style="color:var(--text-muted);text-align:center;font-size:0.85rem;">No data</p>';return;}
                 const activeDev=d.businesses.filter(b=>b.phase==='active_development').length;
                 const monitoring=d.businesses.filter(b=>b.phase==='monitoring').length;
@@ -2658,15 +2658,15 @@
             if(a==='restart'){
                 if(!confirm('Restart HeadQuarter (Mission Control)?'))return;
                 res.style.display='block';res.style.background='var(--accent-soft)';res.style.color='var(--accent)';res.style.borderColor='var(--accent)';res.textContent='⏳ Restarting HeadQuarter...';
-                fetch('/api/restart-hq',{method:'POST'}).then(r=>r.json()).then(d=>{
+                fetch('http://43.129.58.228:8899/api/restart-hq',{method:'POST'}).then(r=>r.json()).then(d=>{
                     res.textContent='✅ '+d.message;res.style.background='var(--green-soft)';res.style.color='var(--green)';res.style.borderColor='var(--green)';
                 }).catch(()=>{
-                    fetch('/api/jarvis/restart',{method:'POST'}).then(r=>r.json()).then(d=>{res.textContent='✅ '+d.message;}).catch(()=>{res.textContent='❌ Failed to restart';res.style.background='var(--red-soft)';res.style.color='var(--red)';res.style.borderColor='var(--red)';});
+                    fetch('http://43.129.58.228:8899/api/jarvis/restart',{method:'POST'}).then(r=>r.json()).then(d=>{res.textContent='✅ '+d.message;}).catch(()=>{res.textContent='❌ Failed to restart';res.style.background='var(--red-soft)';res.style.color='var(--red)';res.style.borderColor='var(--red)';});
                 });
             }
             if(a==='health'){
                 res.style.display='block';res.textContent='⏳ Checking system health...';
-                fetch('/api/system-stats').then(r=>r.json()).then(d=>{
+                fetch('http://43.129.58.228:8899/api/system-stats').then(r=>r.json()).then(d=>{
                     res.textContent='🩺 RAM: '+(d.ram_free_mb||'?')+' MB | Disk: '+(d.disk_used_pct||'?')+'% | Docker: '+(d.docker_running||'?')+' | Uptime: '+(d.uptime||'?');
                     res.style.background='var(--green-soft)';res.style.color='var(--green)';res.style.borderColor='var(--green)';
                     loadSystemStats();
@@ -2676,7 +2676,7 @@
             }
             if(a==='report'){
                 res.style.display='block';res.textContent='⏳ Requesting daily report...';
-                fetch('/api/jarvis/report',{method:'POST'}).then(r=>r.json()).then(d=>{res.textContent='✅ '+d.message;}).catch(()=>{res.textContent='ℹ️ Daily report feature — endpoint not available yet';res.style.background='var(--accent-soft)';res.style.color='var(--accent)';});
+                fetch('http://43.129.58.228:8899/api/jarvis/report',{method:'POST'}).then(r=>r.json()).then(d=>{res.textContent='✅ '+d.message;}).catch(()=>{res.textContent='ℹ️ Daily report feature — endpoint not available yet';res.style.background='var(--accent-soft)';res.style.color='var(--accent)';});
             }
         }
 </script>
