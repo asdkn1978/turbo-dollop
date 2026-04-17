@@ -2691,14 +2691,14 @@
             }
         }
         async function loadAriaPipeline() {
-            var container = document.getElementById('aria-pipeline-queue');
+            var container = document.getElementById("aria-pipeline-queue");
             if (!container || container.dataset.loaded) return;
-            container.dataset.loaded = '1';
+            container.dataset.loaded = "1";
             try {
-                var res = await fetch('/api/blog-notes');
-                if (!res.ok) throw new Error('API ' + res.status);
+                var res = await fetch("/api/blog-notes");
+                if (!res.ok) throw new Error("API " + res.status);
                 var notes = await res.json();
-                var ariaNotes = notes.filter(function(n) { return n.filename.indexOf('aria') !== -1; });
+                var ariaNotes = notes.filter(function(n) { return n.filename.indexOf("aria") !== -1; });
                 if (!ariaNotes.length) {
                     container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">Belum ada konten Aria</p>';
                     return;
@@ -2706,17 +2706,36 @@
                 var html = '<div style="display:grid;gap:10px;">';
                 ariaNotes.forEach(function(note) {
                     var title = note.title || note.filename;
-                    var preview = (note.preview || '').substring(0, 100);
-                    html += '<div style="background:rgba(255,255,255,0.03);border:1px solid #1E2D42;border-radius:10px;padding:14px;">';
+                    var preview = (note.preview || "").substring(0, 100);
+                    html += '<div class="aria-card" data-fn="' + note.filename + '" style="background:rgba(255,255,255,0.03);border:1px solid #1E2D42;border-radius:10px;padding:14px;cursor:pointer;" onclick="showAriaContent(\'' + note.filename + '\')">';
                     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
                     html += '<div style="font-weight:700;font-size:0.85rem;color:#fff;">' + title + '</div>';
                     html += '<span style="padding:2px 8px;border-radius:100;font-size:0.7rem;background:rgba(245,158,11,0.15);color:#f59e0b;">DRAFT</span></div>';
                     html += '<div style="font-size:0.75rem;color:#94a3b8;">' + preview + '...</div></div>';
                 });
                 html += '</div>';
+                html += '<div id="aria-content-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;padding:20px;overflow-y:auto;" onclick="this.style.display=\'none\'"><div style="max-width:600px;margin:20px auto;background:#111927;border:1px solid #1E2D42;border-radius:16px;padding:24px;" onclick="event.stopPropagation()"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3 id="aria-modal-title" style="margin:0;color:#fff;font-size:16px;"></h3><span style="cursor:pointer;font-size:20px;color:#94a3b8;" onclick="document.getElementById(\'aria-content-modal\').style.display=\'none\'">&times;</span></div><div id="aria-modal-body" style="color:#cbd5e1;font-size:0.85rem;line-height:1.7;white-space:pre-wrap;"></div></div></div>';
                 container.innerHTML = html;
             } catch (e) {
                 container.innerHTML = '<p style="color:#ef4444;font-size:0.85rem;">Error: ' + e.message + '</p>';
+            }
+        }
+        async function showAriaContent(fn) {
+            var modal = document.getElementById("aria-content-modal");
+            var title = document.getElementById("aria-modal-title");
+            var body = document.getElementById("aria-modal-body");
+            if (!modal) return;
+            modal.style.display = "block";
+            title.textContent = "Memuat...";
+            body.textContent = "";
+            try {
+                var res = await fetch("/api/blog-notes/" + fn);
+                var text = await res.text();
+                var firstLine = text.match(/^# (.+)/m);
+                title.textContent = firstLine ? firstLine[1] : fn;
+                body.textContent = text;
+            } catch (e) {
+                body.textContent = "Gagal memuat konten.";
             }
         }
 </script>
