@@ -840,7 +840,7 @@
                     </div>
                 </div>
                 <div id="aria-pipeline-queue" style="margin-top:16px;">
-                    <p style="color:var(--text-muted); font-size:0.85rem; text-align:center;">Queue kosong — belum ada konten dalam pipeline</p>
+                    <p id="aria-pipeline-loading" style="color:var(--text-muted); font-size:0.85rem; text-align:center;">Memuat konten...</p>
                 </div>
             </div>
 
@@ -1246,6 +1246,7 @@
                 if (navBtn) {
                     navBtn.classList.add('active');
                 }
+                if (tabId === 'aria') loadAriaPipeline();
                 const newUrl = '/' + tabId;
                 history.pushState({ tabId: tabId }, '', newUrl);
             } catch (error) {
@@ -2689,6 +2690,31 @@
                 fetch('/api/jarvis/report',{method:'POST'}).then(r=>r.json()).then(d=>{res.textContent='✅ '+d.message;}).catch(()=>{res.textContent='ℹ️ Daily report feature — endpoint not available yet';res.style.background='var(--accent-soft)';res.style.color='var(--accent)';});
             }
         }
-</script>
+        async function loadAriaPipeline() {
+            const container = document.getElementById('aria-pipeline-queue');
+            try {
+                const res = await fetch('/api/blog-notes');
+                const notes = await res.json();
+                const ariaNotes = notes.filter(n => n.filename.toLowerCase().includes('aria'));
+                if (!ariaNotes.length) {
+                    container.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem; text-align:center;">Belum ada konten Aria dalam pipeline</p>';
+                    return;
+                }
+                let html = '<div style="display:grid; gap:10px;">';
+                for (const note of ariaNotes) {
+                    const content = await fetch('/api/blog-notes/' + note.filename).then(r => r.text());
+                    const title = content.match(/^# (.+)/m)?.[1] || note.filename;
+                    const platforms = [...new Set((content.match(/Platform:\s*(.+)/gm) || []).map(p => p.replace('Platform:', '').trim()))].join(', ');
+                    const types = [...new Set((content.match(/Type:\s*(.+)/gm) || []).map(t => t.replace('Type:', '').trim()))].join(', ');
+                    html += '<div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:14px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">' + title + '</div><span style="padding:2px 8px; border-radius:100; font-size:0.7rem; background:rgba(245,158,11,0.15); color:#f59e0b;">DRAFT</span></div><div style="font-size:0.75rem; color:var(--text-muted);">' + (platforms || 'Multi-platform') + (types ? ' · ' + types : '') + '</div><div style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">' + note.date + '</div></div>';
+                }
+                html += '</div>';
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<p style="color:#ef4444; font-size:0.85rem;">Gagal memuat konten</p>';
+            }
+        }
 </body>
 </html>
+
+</script>
