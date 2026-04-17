@@ -2692,26 +2692,33 @@
         }
         async function loadAriaPipeline() {
             const container = document.getElementById('aria-pipeline-queue');
+            if (container.dataset.loaded) return;
+            container.dataset.loaded = '1';
             try {
                 const res = await fetch('/api/blog-notes');
+                if (!res.ok) throw new Error('API ' + res.status);
                 const notes = await res.json();
-                const ariaNotes = notes.filter(n => n.filename.toLowerCase().includes('aria'));
+                const ariaNotes = notes.filter(function(n) { return n.filename.toLowerCase().indexOf('aria') !== -1; });
                 if (!ariaNotes.length) {
-                    container.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem; text-align:center;">Belum ada konten Aria dalam pipeline</p>';
+                    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">Belum ada konten Aria dalam pipeline</p>';
                     return;
                 }
-                let html = '<div style="display:grid; gap:10px;">';
-                for (const note of ariaNotes) {
-                    const content = await fetch('/api/blog-notes/' + note.filename).then(r => r.text());
-                    const title = content.match(/^# (.+)/m)?.[1] || note.filename;
-                    const platforms = [...new Set((content.match(/Platform:\s*(.+)/gm) || []).map(p => p.replace('Platform:', '').trim()))].join(', ');
-                    const types = [...new Set((content.match(/Type:\s*(.+)/gm) || []).map(t => t.replace('Type:', '').trim()))].join(', ');
-                    html += '<div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:14px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><div style="font-weight:700; font-size:0.85rem; color:var(--text-primary);">' + title + '</div><span style="padding:2px 8px; border-radius:100; font-size:0.7rem; background:rgba(245,158,11,0.15); color:#f59e0b;">DRAFT</span></div><div style="font-size:0.75rem; color:var(--text-muted);">' + (platforms || 'Multi-platform') + (types ? ' · ' + types : '') + '</div><div style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;">' + note.date + '</div></div>';
-                }
+                var html = '<div style="display:grid;gap:10px;">';
+                ariaNotes.forEach(function(note) {
+                    var title = note.title || note.filename;
+                    var preview = (note.preview || '').substring(0, 80);
+                    html += '<div style="background:rgba(255,255,255,0.03);border:1px solid #1E2D42;border-radius:10px;padding:14px;cursor:pointer;" onclick="window.location.hash='notes';setTimeout(function(){document.querySelector('[data-filename=\'' + note.filename + '\']')?.click()},100)">' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+                        '<div style="font-weight:700;font-size:0.85rem;color:#fff;">' + title + '</div>' +
+                        '<span style="padding:2px 8px;border-radius:100;font-size:0.7rem;background:rgba(245,158,11,0.15);color:#f59e0b;">DRAFT</span></div>' +
+                        '<div style="font-size:0.75rem;color:#94a3b8;">' + (preview || '') + '</div>' +
+                        '<div style="font-size:0.7rem;color:#64748b;margin-top:4px;">📄 ' + note.filename + '</div></div>';
+                });
                 html += '</div>';
                 container.innerHTML = html;
             } catch (e) {
-                container.innerHTML = '<p style="color:#ef4444; font-size:0.85rem;">Gagal memuat konten</p>';
+                console.error('Aria pipeline error:', e);
+                container.innerHTML = '<p style="color:#ef4444;font-size:0.85rem;text-align:center;">Gagal memuat: ' + e.message + '</p>';
             }
         }
 </body>
