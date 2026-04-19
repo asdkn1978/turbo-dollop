@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://okay-quest-passive-council.trycloudflare.com/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://hq.averacloud.com/api/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
