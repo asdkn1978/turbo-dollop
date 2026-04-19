@@ -528,6 +528,7 @@
                 <button id="nav-projects" onclick="showTab('projects')">📁 Projects</button>
                 <button id="nav-notes" onclick="showTab('notes')">📝 Notes</button>
                 <button id="nav-jarvis" onclick="showTab('jarvis')">🤖 Jarvis</button>
+                <button id="nav-office" onclick="showTab('office')">🏢 Office</button>
             </div>
         </div>
 
@@ -563,6 +564,10 @@
                 <div class="mobile-nav-card" onclick="showTab('jarvis')">
                     <div class="mobile-nav-icon">🤖</div>
                     <div class="mobile-nav-label">Jarvis</div>
+                </div>
+                <div class="mobile-nav-card" onclick="showTab('office')">
+                    <div class="mobile-nav-icon">🏢</div>
+                    <div class="mobile-nav-label">Office</div>
                 </div>
             </div>
         </div>
@@ -1101,6 +1106,41 @@
             </div>
         </div>
 
+        <!-- Office Tab -->
+        <div id="office" class="content">
+            <div class="mobile-back-button" onclick="goBackToHome()">
+                <div class="mobile-back-button-content">
+                    <span class="mobile-back-icon">←</span>
+                    <span class="mobile-back-title">🏢 Office</span>
+                </div>
+            </div>
+            <h2 style="margin:0;">🏢 Pixel Office World</h2>
+            <p style="color:var(--text-muted); margin:4px 0 20px 0; font-size:0.9rem;">Live office view with animated agent sprites</p>
+
+            <!-- Office Canvas Container -->
+            <div style="background:#0a0f1e; border:1px solid var(--border); border-radius:14px; padding:20px; display:flex; flex-direction:column; align-items:center; gap:16px;">
+                <canvas id="office-canvas" width="320" height="240" style="image-rendering:pixelated; width:640px; height:480px; background:#12121f; border-radius:8px; cursor:pointer;"></canvas>
+                
+                <!-- Info Panel -->
+                <div style="width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 16px; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; font-family:monospace; font-size:0.85rem;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="color:var(--text-muted);">⏰ <span id="office-time">--:--</span> WIB</span>
+                        <span style="color:var(--text-muted);">👥 Active: <span id="office-active-count" style="color:var(--accent); font-weight:700;">0</span>/5</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:0.8rem;">🟢 Working</span>
+                        <span style="font-size:0.8rem;">🟡 Idle</span>
+                        <span style="font-size:0.8rem;">⚫ Offline</span>
+                    </div>
+                </div>
+                
+                <!-- Selected Agent Info -->
+                <div id="selected-agent-info" style="width:100%; display:none; padding:12px 16px; background:var(--accent-soft); border:1px solid var(--accent); border-radius:12px; font-family:monospace; font-size:0.85rem;">
+                    <span id="selected-agent-text" style="color:var(--accent); font-weight:600;"></span>
+                </div>
+            </div>
+        </div>
+
         <!-- Note Modal -->
         <div id="note-modal" class="modal">
             <div class="modal-content">
@@ -1275,6 +1315,7 @@
                 'edelwolke': 'edelwolke',
                 'aria': 'aria',
                 'notes': 'notes',
+                'office': 'office',
 
             };
 
@@ -2787,6 +2828,303 @@
                 body.textContent = "Gagal memuat konten.";
             }
         }
+
+        // ==================== PIXEL OFFICE WORLD ====================
+
+        const officeCanvas = document.getElementById('office-canvas');
+        const officeCtx = officeCanvas ? officeCanvas.getContext('2d') : null;
+        const officeTime = document.getElementById('office-time');
+        const officeActiveCount = document.getElementById('office-active-count');
+        const selectedAgentInfo = document.getElementById('selected-agent-info');
+        const selectedAgentText = document.getElementById('selected-agent-text');
+
+        // Agent configuration
+        const agents = [
+            { name: 'MIJA', role: 'COO', color: '#22C55E', status: 'working', task: 'Building AveraCloud', deskX: 40, deskY: 120, emoji: '📝' },
+            { name: 'DIVA', role: 'CMO', color: '#EC4899', status: 'idle', task: '', deskX: 120, deskY: 120, emoji: '🎨' },
+            { name: 'ZARA', role: 'CDO', color: '#3B82F6', status: 'working', task: 'Analytics', deskX: 200, deskY: 120, emoji: '📊' },
+            { name: 'MAX', role: 'Ops', color: '#F97316', status: 'stopped', task: '', deskX: 40, deskY: 200, emoji: '🔧' },
+            { name: 'REL', role: 'Relations', color: '#A855F7', status: 'idle', task: '', deskX: 120, deskY: 200, emoji: '🤝' }
+        ];
+
+        // Animation state
+        let officeFrame = 0;
+        let lastFrameTime = 0;
+        const FRAME_INTERVAL = 250; // ~4fps
+        let catPosition = { x: -20, y: 220, direction: 1 };
+        let lastCatMove = 0;
+        let coffeeSteam = [];
+        let plantOffset = 0;
+        let selectedAgent = null;
+
+        // Draw pixel rectangle
+        function drawPixelRect(x, y, w, h, color) {
+            officeCtx.fillStyle = color;
+            officeCtx.fillRect(Math.floor(x), Math.floor(y), w, h);
+        }
+
+        // Draw desk
+        function drawDesk(x, y) {
+            // Desk (wood color)
+            drawPixelRect(x, y + 16, 16, 8, '#8B4513');
+            // Monitor
+            drawPixelRect(x + 4, y + 4, 8, 6, '#333');
+            // Monitor stand
+            drawPixelRect(x + 7, y + 10, 2, 6, '#555');
+        }
+
+        // Draw chair
+        function drawChair(x, y, occupied) {
+            const chairColor = occupied ? '#666' : '#888';
+            drawPixelRect(x, y + 12, 8, 8, chairColor);
+            drawPixelRect(x - 2, y + 4, 12, 8, chairColor);
+        }
+
+        // Draw agent sprite
+        function drawAgent(agent, frame) {
+            const { deskX, deskY, color, status, emoji } = agent;
+            const x = deskX + 4;
+            const y = deskY - 8;
+
+            if (status === 'stopped') {
+                // Empty chair
+                drawChair(x, y, false);
+                // Monitor off
+                drawPixelRect(deskX + 4, deskY + 4, 8, 6, '#111');
+                // ZZZ floating
+                if (frame % 60 < 30) {
+                    officeCtx.fillStyle = '#FFF';
+                    officeCtx.font = '8px monospace';
+                    officeCtx.fillText('Z', x + 10, y - 4 - (frame % 20) / 4);
+                }
+                return;
+            }
+
+            // Draw chair
+            drawChair(x, y, true);
+
+            // Draw desk and monitor
+            drawDesk(deskX, deskY);
+
+            // Head (8x8)
+            drawPixelRect(x, y, 8, 8, '#FFD93D');
+
+            // Body (8x8)
+            drawPixelRect(x, y + 8, 8, 8, color);
+
+            // Monitor screen content based on status
+            if (status === 'working') {
+                // Scrolling lines on screen
+                const scrollOffset = (frame / 8) % 4;
+                for (let i = 0; i < 3; i++) {
+                    const lineY = deskY + 5 + ((i + scrollOffset) % 3) * 2;
+                    drawPixelRect(deskX + 5, lineY, 6, 1, '#4AF');
+                }
+                
+                // Typing animation
+                if (frame % 8 < 4) {
+                    drawPixelRect(x + 2, y + 16, 4, 2, '#FFF');
+                }
+
+                // Thought bubble with emoji
+                if (frame % 30 < 20) {
+                    officeCtx.font = '10px sans-serif';
+                    officeCtx.fillText(emoji, x - 2, y - 4);
+                }
+            } else {
+                // Idle - static or dim screen
+                drawPixelRect(deskX + 5, deskY + 5, 6, 4, '#333');
+                
+                // Occasionally look around
+                if (frame % 120 < 10) {
+                    // Head turn - slightly different head position
+                    drawPixelRect(x + 1, y, 6, 8, '#FFD93D');
+                }
+            }
+        }
+
+        // Draw room elements
+        function drawRoom() {
+            // Background
+            drawPixelRect(0, 0, 320, 240, '#12121f');
+
+            // Floor tiles pattern
+            for (let x = 0; x < 320; x += 16) {
+                for (let y = 180; y < 240; y += 16) {
+                    const tileColor = ((x / 16 + y / 16) % 2 === 0) ? '#1a1a2e' : '#1e1e36';
+                    drawPixelRect(x, y, 16, 16, tileColor);
+                }
+            }
+
+            // Wall (top area)
+            drawPixelRect(0, 0, 320, 180, '#0d0d14');
+
+            // Coffee corner
+            drawPixelRect(280, 180, 30, 20, '#2a2a3a');
+            drawPixelRect(290, 170, 10, 10, '#444'); // Coffee maker
+            drawPixelRect(292, 172, 6, 6, '#666'); // Coffee maker top
+
+            // Steam particles
+            coffeeSteam = coffeeSteam.filter(s => s.life > 0);
+            coffeeSteam.forEach(s => {
+                drawPixelRect(s.x, s.y, 2, 2, 'rgba(255,255,255,0.3)');
+                s.y -= 0.5;
+                s.life--;
+            });
+            if (Math.random() < 0.1) {
+                coffeeSteam.push({ x: 293 + Math.random() * 4, y: 168, life: 20 });
+            }
+
+            // Potted plant
+            plantOffset = Math.sin(officeFrame / 30) * 1;
+            drawPixelRect(260, 190, 16, 20, '#8B4513'); // Pot
+            drawPixelRect(264, 180 + plantOffset, 8, 12, '#228B22'); // Plant stem
+            drawPixelRect(258, 175 + plantOffset, 6, 8, '#2E8B57'); // Leaves left
+            drawPixelRect(270, 175 + plantOffset, 6, 8, '#2E8B57'); // Leaves right
+
+            // Wall clock
+            drawPixelRect(150, 10, 20, 20, '#333');
+            drawPixelRect(159, 19, 2, 2, '#FFF'); // Clock center
+            const now = new Date();
+            const hours = now.getHours() % 12;
+            const minutes = now.getMinutes();
+            const hourAngle = (hours + minutes / 60) * 30;
+            const minuteAngle = minutes * 6;
+            // Hour hand
+            const hourX = 160 + Math.cos((hourAngle - 90) * Math.PI / 180) * 6;
+            const hourY = 20 + Math.sin((hourAngle - 90) * Math.PI / 180) * 6;
+            drawPixelRect(159, 19, 2, 2, '#FFF');
+            officeCtx.strokeStyle = '#FFF';
+            officeCtx.lineWidth = 1;
+            officeCtx.beginPath();
+            officeCtx.moveTo(160, 20);
+            officeCtx.lineTo(hourX, hourY);
+            officeCtx.stroke();
+            // Minute hand
+            const minX = 160 + Math.cos((minuteAngle - 90) * Math.PI / 180) * 8;
+            const minY = 20 + Math.sin((minuteAngle - 90) * Math.PI / 180) * 8;
+            officeCtx.beginPath();
+            officeCtx.moveTo(160, 20);
+            officeCtx.lineTo(minX, minY);
+            officeCtx.stroke();
+
+            // Notice board
+            drawPixelRect(10, 10, 40, 30, '#8B4513');
+            drawPixelRect(12, 12, 36, 26, '#DEB887');
+            // Papers on notice board
+            drawPixelRect(15, 15, 10, 12, '#FFF');
+            drawPixelRect(28, 18, 8, 10, '#FFD');
+            // Flutter animation
+            if (Math.random() < 0.05) {
+                drawPixelRect(15 + Math.random() * 2, 14, 10, 1, '#EEE');
+            }
+
+            // Draw all agents
+            agents.forEach(agent => drawAgent(agent, officeFrame));
+
+            // Draw cat
+            const nowTime = Date.now();
+            if (nowTime - lastCatMove > 30000) {
+                // Start new cat walk
+                lastCatMove = nowTime;
+                catPosition = { x: -20, y: 220, direction: 1 };
+            }
+            if (catPosition.x >= 0 && catPosition.x < 320) {
+                // Draw cat (simple pixel cat)
+                const catX = Math.floor(catPosition.x);
+                const catY = Math.floor(catPosition.y);
+                drawPixelRect(catX, catY, 8, 6, '#FFA500'); // Body
+                drawPixelRect(catX + 6, catY - 2, 4, 4, '#FFA500'); // Head
+                drawPixelRect(catX + 8, catY - 4, 2, 2, '#FFA500'); // Ear
+                drawPixelRect(catX + 9, catY - 2, 1, 1, '#000'); // Eye
+                drawPixelRect(catX, catY + 4, 2, 2, '#FFA500'); // Tail
+                
+                catPosition.x += 0.5 * catPosition.direction;
+            }
+        }
+
+        // Update info panel
+        function updateOfficeInfo() {
+            if (!officeTime) return;
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' });
+            officeTime.textContent = timeStr;
+            
+            const activeCount = agents.filter(a => a.status !== 'stopped').length;
+            if (officeActiveCount) {
+                officeActiveCount.textContent = activeCount;
+            }
+        }
+
+        // Main animation loop
+        function animateOffice(timestamp) {
+            if (!officeCtx) return;
+            
+            const elapsed = timestamp - lastFrameTime;
+            
+            if (elapsed >= FRAME_INTERVAL) {
+                officeFrame++;
+                lastFrameTime = timestamp;
+                
+                // Clear and redraw
+                officeCtx.clearRect(0, 0, 320, 240);
+                drawRoom();
+                updateOfficeInfo();
+            }
+            
+            requestAnimationFrame(animateOffice);
+        }
+
+        // Canvas click handler for agent selection
+        function handleCanvasClick(event) {
+            const rect = officeCanvas.getBoundingClientRect();
+            const scaleX = officeCanvas.width / rect.width;
+            const scaleY = officeCanvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            // Check if clicked on any agent
+            for (const agent of agents) {
+                const agentX = agent.deskX + 4;
+                const agentY = agent.deskY - 8;
+                if (x >= agentX && x <= agentX + 16 && y >= agentY && y <= agentY + 24) {
+                    selectedAgent = agent;
+                    showSelectedAgentInfo(agent);
+                    break;
+                }
+            }
+        }
+
+        // Show selected agent info
+        function showSelectedAgentInfo(agent) {
+            if (!selectedAgentInfo || !selectedAgentText) return;
+            
+            const statusEmoji = agent.status === 'working' ? '🟢' : (agent.status === 'idle' ? '🟡' : '⚫');
+            const taskText = agent.task ? ` | Task: ${agent.task}` : '';
+            const sinceTime = '09:00';
+            
+            selectedAgentText.textContent = `${statusEmoji} ${agent.name} (${agent.role}) | Status: ${agent.status}${taskText} | Since: ${sinceTime} WIB`;
+            selectedAgentInfo.style.display = 'block';
+        }
+
+        // Initialize office canvas when tab is shown
+        function initOfficeCanvas() {
+            if (officeCanvas && !officeCanvas.hasAttribute('data-initialized')) {
+                officeCanvas.setAttribute('data-initialized', 'true');
+                officeCanvas.addEventListener('click', handleCanvasClick);
+                requestAnimationFrame(animateOffice);
+            }
+        }
+
+        // Override showTab to init office canvas
+        const originalShowTab = showTab;
+        showTab = function(tabId) {
+            originalShowTab(tabId);
+            if (tabId === 'office') {
+                setTimeout(initOfficeCanvas, 100);
+            }
+        };
 </script>
 </body>
 </html>
