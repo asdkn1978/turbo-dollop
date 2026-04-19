@@ -3020,7 +3020,18 @@
             }
 
             // Draw all agents
-            agents.forEach(agent => drawAgent(agent, officeFrame));
+            agents.forEach(agent => {
+                drawAgent(agent, officeFrame);
+                // Name label above agent
+                officeCtx.fillStyle = '#f1f5f9';
+                officeCtx.font = 'bold 7px monospace';
+                officeCtx.textAlign = 'center';
+                officeCtx.fillText(agent.name, agent.deskX + 12, agent.deskY - 18);
+                // Role below name
+                officeCtx.fillStyle = agent.color;
+                officeCtx.font = '5px monospace';
+                officeCtx.fillText(agent.role, agent.deskX + 12, agent.deskY - 11);
+            });
 
             // Draw cat
             const nowTime = Date.now();
