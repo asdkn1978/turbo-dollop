@@ -1119,7 +1119,7 @@
 
             <!-- Office Canvas Container -->
             <div style="background:#0a0f1e; border:1px solid var(--border); border-radius:14px; padding:20px; display:flex; flex-direction:column; align-items:center; gap:16px;">
-                <canvas id="office-canvas" width="320" height="240" style="image-rendering:pixelated; width:640px; height:480px; background:#12121f; border-radius:8px; cursor:pointer;"></canvas>
+                <canvas id="office-canvas" width="960" height="600" style="width:100%;max-width:960px;height:auto;background:#12121f;border-radius:8px;cursor:pointer;"></canvas>
                 
                 <!-- Info Panel -->
                 <div style="width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 16px; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; font-family:monospace; font-size:0.85rem;">
@@ -2840,11 +2840,11 @@
 
         // Agent configuration
         const agents = [
-            { name: 'MIJA', role: 'COO', color: '#22C55E', status: 'working', task: 'Building AveraCloud', deskX: 10, deskY: 110, emoji: '📝' },
-            { name: 'DIVA', role: 'CMO', color: '#EC4899', status: 'idle', task: '', deskX: 110, deskY: 110, emoji: '🎨' },
-            { name: 'ZARA', role: 'CDO', color: '#3B82F6', status: 'working', task: 'Analytics', deskX: 210, deskY: 110, emoji: '📊' },
-            { name: 'MAX', role: 'Ops', color: '#F97316', status: 'stopped', task: '', deskX: 60, deskY: 200, emoji: '🔧' },
-            { name: 'REL', role: 'Relations', color: '#A855F7', status: 'idle', task: '', deskX: 180, deskY: 200, emoji: '🤝' }
+            { name: 'MIJA', role: 'COO', color: '#22C55E', status: 'working', task: 'Building AveraCloud', deskX: 30, deskY: 250, emoji: '📝' },
+            { name: 'DIVA', role: 'CMO', color: '#EC4899', status: 'idle', task: '', deskX: 240, deskY: 250, emoji: '🎨' },
+            { name: 'ZARA', role: 'CDO', color: '#3B82F6', status: 'working', task: 'Analytics', deskX: 450, deskY: 250, emoji: '📊' },
+            { name: 'MAX', role: 'Ops', color: '#F97316', status: 'stopped', task: '', deskX: 140, deskY: 400, emoji: '🔧' },
+            { name: 'REL', role: 'Relations', color: '#A855F7', status: 'idle', task: '', deskX: 350, deskY: 400, emoji: '🤝' }
         ];
 
         // Animation state
@@ -2863,39 +2863,39 @@
             officeCtx.fillRect(Math.floor(x), Math.floor(y), w, h);
         }
 
-        // Draw desk
+        // Draw desk (scaled 3x)
         function drawDesk(x, y) {
             // Desk (wood color)
-            drawPixelRect(x, y + 16, 16, 8, '#8B4513');
+            drawPixelRect(x, y + 48, 48, 24, '#8B4513');
             // Monitor
-            drawPixelRect(x + 4, y + 4, 8, 6, '#333');
+            drawPixelRect(x + 12, y + 12, 24, 18, '#333');
             // Monitor stand
-            drawPixelRect(x + 7, y + 10, 2, 6, '#555');
+            drawPixelRect(x + 21, y + 30, 6, 18, '#555');
         }
 
-        // Draw chair
+        // Draw chair (scaled 3x)
         function drawChair(x, y, occupied) {
             const chairColor = occupied ? '#666' : '#888';
-            drawPixelRect(x, y + 12, 8, 8, chairColor);
-            drawPixelRect(x - 2, y + 4, 12, 8, chairColor);
+            drawPixelRect(x, y + 36, 24, 24, chairColor);
+            drawPixelRect(x - 6, y + 12, 36, 24, chairColor);
         }
 
-        // Draw agent sprite
+        // Draw agent sprite (scaled 3x)
         function drawAgent(agent, frame) {
             const { deskX, deskY, color, status, emoji } = agent;
-            const x = deskX + 4;
-            const y = deskY - 8;
+            const x = deskX + 12;
+            const y = deskY - 24;
 
             if (status === 'stopped') {
                 // Empty chair
                 drawChair(x, y, false);
                 // Monitor off
-                drawPixelRect(deskX + 4, deskY + 4, 8, 6, '#111');
+                drawPixelRect(deskX + 12, deskY + 12, 24, 18, '#111');
                 // ZZZ floating
                 if (frame % 60 < 30) {
                     officeCtx.fillStyle = '#FFF';
-                    officeCtx.font = '8px monospace';
-                    officeCtx.fillText('Z', x + 10, y - 4 - (frame % 20) / 4);
+                    officeCtx.font = '24px monospace';
+                    officeCtx.fillText('Z', x + 30, y - 12 - (frame % 20) / 4);
                 }
                 return;
             }
@@ -2906,150 +2906,153 @@
             // Draw desk and monitor
             drawDesk(deskX, deskY);
 
-            // Head (8x8)
-            drawPixelRect(x, y, 8, 8, '#FFD93D');
+            // Head (24x24)
+            drawPixelRect(x, y, 24, 24, '#FFD93D');
 
-            // Body (8x8)
-            drawPixelRect(x, y + 8, 8, 8, color);
+            // Body (24x32)
+            drawPixelRect(x, y + 24, 24, 32, color);
 
             // Monitor screen content based on status
             if (status === 'working') {
                 // Scrolling lines on screen
                 const scrollOffset = (frame / 8) % 4;
                 for (let i = 0; i < 3; i++) {
-                    const lineY = deskY + 5 + ((i + scrollOffset) % 3) * 2;
-                    drawPixelRect(deskX + 5, lineY, 6, 1, '#4AF');
+                    const lineY = deskY + 15 + ((i + scrollOffset) % 3) * 6;
+                    drawPixelRect(deskX + 15, lineY, 18, 3, '#4AF');
                 }
                 
                 // Typing animation
                 if (frame % 8 < 4) {
-                    drawPixelRect(x + 2, y + 16, 4, 2, '#FFF');
+                    drawPixelRect(x + 6, y + 48, 12, 6, '#FFF');
                 }
 
                 // Thought bubble with emoji
                 if (frame % 30 < 20) {
-                    officeCtx.font = '10px sans-serif';
-                    officeCtx.fillText(emoji, x - 2, y - 4);
+                    officeCtx.font = '30px sans-serif';
+                    officeCtx.fillText(emoji, x - 6, y - 12);
                 }
             } else {
                 // Idle - static or dim screen
-                drawPixelRect(deskX + 5, deskY + 5, 6, 4, '#333');
+                drawPixelRect(deskX + 15, deskY + 15, 18, 12, '#333');
                 
                 // Occasionally look around
                 if (frame % 120 < 10) {
                     // Head turn - slightly different head position
-                    drawPixelRect(x + 1, y, 6, 8, '#FFD93D');
+                    drawPixelRect(x + 3, y, 18, 24, '#FFD93D');
                 }
             }
         }
 
         // Draw room elements
         function drawRoom() {
+            // Enable smooth text rendering
+            officeCtx.imageSmoothingEnabled = true;
+
             // Background
-            drawPixelRect(0, 0, 320, 240, '#12121f');
+            drawPixelRect(0, 0, 960, 600, '#12121f');
 
             // Floor tiles pattern
-            for (let x = 0; x < 320; x += 16) {
-                for (let y = 180; y < 240; y += 16) {
-                    const tileColor = ((x / 16 + y / 16) % 2 === 0) ? '#1a1a2e' : '#1e1e36';
-                    drawPixelRect(x, y, 16, 16, tileColor);
+            for (let x = 0; x < 960; x += 48) {
+                for (let y = 450; y < 600; y += 48) {
+                    const tileColor = ((x / 48 + y / 48) % 2 === 0) ? '#1a1a2e' : '#1e1e36';
+                    drawPixelRect(x, y, 48, 48, tileColor);
                 }
             }
 
             // Wall (top area)
-            drawPixelRect(0, 0, 320, 180, '#0d0d14');
+            drawPixelRect(0, 0, 960, 450, '#0d0d14');
 
-            // Coffee corner
-            drawPixelRect(280, 180, 30, 20, '#2a2a3a');
-            drawPixelRect(290, 170, 10, 10, '#444'); // Coffee maker
-            drawPixelRect(292, 172, 6, 6, '#666'); // Coffee maker top
+            // Coffee corner (scaled 3x)
+            drawPixelRect(840, 540, 90, 60, '#2a2a3a');
+            drawPixelRect(870, 510, 30, 30, '#444'); // Coffee maker
+            drawPixelRect(876, 516, 18, 18, '#666'); // Coffee maker top
 
-            // Steam particles
+            // Steam particles (scaled 3x)
             coffeeSteam = coffeeSteam.filter(s => s.life > 0);
             coffeeSteam.forEach(s => {
-                drawPixelRect(s.x, s.y, 2, 2, 'rgba(255,255,255,0.3)');
-                s.y -= 0.5;
+                drawPixelRect(s.x, s.y, 6, 6, 'rgba(255,255,255,0.3)');
+                s.y -= 1.5;
                 s.life--;
             });
             if (Math.random() < 0.1) {
-                coffeeSteam.push({ x: 293 + Math.random() * 4, y: 168, life: 20 });
+                coffeeSteam.push({ x: 879 + Math.random() * 12, y: 504, life: 20 });
             }
 
-            // Potted plant
-            plantOffset = Math.sin(officeFrame / 30) * 1;
-            drawPixelRect(260, 190, 16, 20, '#8B4513'); // Pot
-            drawPixelRect(264, 180 + plantOffset, 8, 12, '#228B22'); // Plant stem
-            drawPixelRect(258, 175 + plantOffset, 6, 8, '#2E8B57'); // Leaves left
-            drawPixelRect(270, 175 + plantOffset, 6, 8, '#2E8B57'); // Leaves right
+            // Potted plant (scaled 3x)
+            plantOffset = Math.sin(officeFrame / 30) * 3;
+            drawPixelRect(780, 570, 48, 60, '#8B4513'); // Pot
+            drawPixelRect(792, 540 + plantOffset, 24, 36, '#228B22'); // Plant stem
+            drawPixelRect(774, 525 + plantOffset, 18, 24, '#2E8B57'); // Leaves left
+            drawPixelRect(810, 525 + plantOffset, 18, 24, '#2E8B57'); // Leaves right
 
-            // Wall clock
-            drawPixelRect(150, 10, 20, 20, '#333');
-            drawPixelRect(159, 19, 2, 2, '#FFF'); // Clock center
+            // Wall clock (scaled 3x)
+            drawPixelRect(450, 30, 60, 60, '#333');
+            drawPixelRect(477, 57, 6, 6, '#FFF'); // Clock center
             const now = new Date();
             const hours = now.getHours() % 12;
             const minutes = now.getMinutes();
             const hourAngle = (hours + minutes / 60) * 30;
             const minuteAngle = minutes * 6;
             // Hour hand
-            const hourX = 160 + Math.cos((hourAngle - 90) * Math.PI / 180) * 6;
-            const hourY = 20 + Math.sin((hourAngle - 90) * Math.PI / 180) * 6;
-            drawPixelRect(159, 19, 2, 2, '#FFF');
+            const hourX = 480 + Math.cos((hourAngle - 90) * Math.PI / 180) * 18;
+            const hourY = 60 + Math.sin((hourAngle - 90) * Math.PI / 180) * 18;
+            drawPixelRect(477, 57, 6, 6, '#FFF');
             officeCtx.strokeStyle = '#FFF';
-            officeCtx.lineWidth = 1;
+            officeCtx.lineWidth = 3;
             officeCtx.beginPath();
-            officeCtx.moveTo(160, 20);
+            officeCtx.moveTo(480, 60);
             officeCtx.lineTo(hourX, hourY);
             officeCtx.stroke();
             // Minute hand
-            const minX = 160 + Math.cos((minuteAngle - 90) * Math.PI / 180) * 8;
-            const minY = 20 + Math.sin((minuteAngle - 90) * Math.PI / 180) * 8;
+            const minX = 480 + Math.cos((minuteAngle - 90) * Math.PI / 180) * 24;
+            const minY = 60 + Math.sin((minuteAngle - 90) * Math.PI / 180) * 24;
             officeCtx.beginPath();
-            officeCtx.moveTo(160, 20);
+            officeCtx.moveTo(480, 60);
             officeCtx.lineTo(minX, minY);
             officeCtx.stroke();
 
-            // Notice board
-            drawPixelRect(10, 10, 40, 30, '#8B4513');
-            drawPixelRect(12, 12, 36, 26, '#DEB887');
+            // Notice board (scaled 3x)
+            drawPixelRect(30, 30, 120, 90, '#8B4513');
+            drawPixelRect(36, 36, 108, 78, '#DEB887');
             // Papers on notice board
-            drawPixelRect(15, 15, 10, 12, '#FFF');
-            drawPixelRect(28, 18, 8, 10, '#FFD');
+            drawPixelRect(45, 45, 30, 36, '#FFF');
+            drawPixelRect(84, 54, 24, 30, '#FFD');
             // Flutter animation
             if (Math.random() < 0.05) {
-                drawPixelRect(15 + Math.random() * 2, 14, 10, 1, '#EEE');
+                drawPixelRect(45 + Math.random() * 6, 42, 30, 3, '#EEE');
             }
 
             // Draw all agents
             agents.forEach(agent => {
                 drawAgent(agent, officeFrame);
-                // Name label above agent
+                // Name label above agent (larger fonts)
                 officeCtx.fillStyle = '#f1f5f9';
-                officeCtx.font = 'bold 10px sans-serif';
+                officeCtx.font = 'bold 16px sans-serif';
                 officeCtx.textAlign = 'center';
-                officeCtx.fillText(agent.name, agent.deskX + 12, agent.deskY - 20);
+                officeCtx.fillText(agent.name, agent.deskX + 30, agent.deskY - 70);
                 officeCtx.fillStyle = agent.color;
-                officeCtx.font = '7px sans-serif';
-                officeCtx.fillText(agent.role, agent.deskX + 12, agent.deskY - 11);
+                officeCtx.font = '11px sans-serif';
+                officeCtx.fillText(agent.role, agent.deskX + 30, agent.deskY - 55);
             });
 
-            // Draw cat
+            // Draw cat (scaled 3x)
             const nowTime = Date.now();
             if (nowTime - lastCatMove > 30000) {
                 // Start new cat walk
                 lastCatMove = nowTime;
-                catPosition = { x: -20, y: 220, direction: 1 };
+                catPosition = { x: -60, y: 660, direction: 1 };
             }
-            if (catPosition.x >= 0 && catPosition.x < 320) {
+            if (catPosition.x >= 0 && catPosition.x < 960) {
                 // Draw cat (simple pixel cat)
                 const catX = Math.floor(catPosition.x);
                 const catY = Math.floor(catPosition.y);
-                drawPixelRect(catX, catY, 8, 6, '#FFA500'); // Body
-                drawPixelRect(catX + 6, catY - 2, 4, 4, '#FFA500'); // Head
-                drawPixelRect(catX + 8, catY - 4, 2, 2, '#FFA500'); // Ear
-                drawPixelRect(catX + 9, catY - 2, 1, 1, '#000'); // Eye
-                drawPixelRect(catX, catY + 4, 2, 2, '#FFA500'); // Tail
+                drawPixelRect(catX, catY, 24, 18, '#FFA500'); // Body
+                drawPixelRect(catX + 18, catY - 6, 12, 12, '#FFA500'); // Head
+                drawPixelRect(catX + 24, catY - 12, 6, 6, '#FFA500'); // Ear
+                drawPixelRect(catX + 27, catY - 6, 3, 3, '#000'); // Eye
+                drawPixelRect(catX, catY + 12, 6, 6, '#FFA500'); // Tail
                 
-                catPosition.x += 0.5 * catPosition.direction;
+                catPosition.x += 1.5 * catPosition.direction;
             }
         }
 
@@ -3078,7 +3081,7 @@
                 lastFrameTime = timestamp;
                 
                 // Clear and redraw
-                officeCtx.clearRect(0, 0, 320, 240);
+                officeCtx.clearRect(0, 0, 960, 600);
                 drawRoom();
                 updateOfficeInfo();
             }
@@ -3089,16 +3092,16 @@
         // Canvas click handler for agent selection
         function handleCanvasClick(event) {
             const rect = officeCanvas.getBoundingClientRect();
-            const scaleX = officeCanvas.width / rect.width;
-            const scaleY = officeCanvas.height / rect.height;
+            const scaleX = 960 / rect.width;
+            const scaleY = 600 / rect.height;
             const x = (event.clientX - rect.left) * scaleX;
             const y = (event.clientY - rect.top) * scaleY;
             
-            // Check if clicked on any agent
+            // Check if clicked on any agent (60x60 hit box around each agent)
             for (const agent of agents) {
-                const agentX = agent.deskX + 4;
-                const agentY = agent.deskY - 8;
-                if (x >= agentX && x <= agentX + 16 && y >= agentY && y <= agentY + 24) {
+                const agentX = agent.deskX + 12;
+                const agentY = agent.deskY - 24;
+                if (x >= agentX && x <= agentX + 48 && y >= agentY && y <= agentY + 72) {
                     selectedAgent = agent;
                     showSelectedAgentInfo(agent);
                     break;
