@@ -2714,14 +2714,13 @@
                     html += '<div style="font-size:0.75rem;color:#94a3b8;">' + preview + '...</div></div>';
                 });
                 html += '</div>';
-                html += '<div id="aria-content-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;padding:20px;overflow-y:auto;" onclick="this.style.display=\'none\'"><div style="max-width:600px;margin:20px auto;background:#111927;border:1px solid #1E2D42;border-radius:16px;padding:24px;" onclick="event.stopPropagation()"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3 id="aria-modal-title" style="margin:0;color:#fff;font-size:16px;"></h3><span style="cursor:pointer;font-size:20px;color:#94a3b8;" onclick="document.getElementById(\'aria-content-modal\').style.display=\'none\'">&times;</span></div><div id="aria-modal-body" style="color:#cbd5e1;font-size:0.85rem;line-height:1.7;white-space:pre-wrap;"></div>
-                <div style="display:flex;gap:10px;margin-top:16px;">
-                    <button onclick="approveAria()" style="flex:1;padding:10px;background:#22C55E;color:#000;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Approve</button>
-                    <button onclick="rejectAria()" style="flex:1;padding:10px;background:transparent;border:1px solid #ef4444;color:#ef4444;border-radius:8px;cursor:pointer;font-size:13px;">Reject</button>
-                </div>
-                <div id="aria-result" style="margin-top:10px;display:none;padding:10px;border-radius:8px;font-size:13px;text-align:center;"></div>
-            </div></div>';
+                html += '<div id="aria-content-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;padding:20px;overflow-y:auto;"><div id="aria-modal-inner" style="max-width:600px;margin:20px auto;background:#111927;border:1px solid #1E2D42;border-radius:16px;padding:24px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3 id="aria-modal-title" style="margin:0;color:#fff;font-size:16px;"></h3><span id="aria-modal-close" style="cursor:pointer;font-size:20px;color:#94a3b8;">&times;</span></div><div id="aria-modal-body" style="color:#cbd5e1;font-size:0.85rem;line-height:1.7;white-space:pre-wrap;"></div><div style="display:flex;gap:10px;margin-top:16px;"><button id="aria-approve-btn" style="flex:1;padding:10px;background:#22C55E;color:#000;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Approve</button><button id="aria-reject-btn" style="flex:1;padding:10px;background:transparent;border:1px solid #ef4444;color:#ef4444;border-radius:8px;cursor:pointer;font-size:13px;">Reject</button></div><div id="aria-result" style="margin-top:10px;display:none;padding:10px;border-radius:8px;font-size:13px;text-align:center;"></div></div></div>';
                 container.innerHTML = html;
+                document.getElementById("aria-modal-close").onclick = function(){ document.getElementById("aria-content-modal").style.display="none"; };
+                document.getElementById("aria-content-modal").onclick = function(e){ if(e.target===this) this.style.display="none"; };
+                document.getElementById("aria-modal-inner").onclick = function(e){ e.stopPropagation(); };
+                document.getElementById("aria-approve-btn").onclick = approveAria;
+                document.getElementById("aria-reject-btn").onclick = rejectAria;
             } catch (e) {
                 container.innerHTML = '<p style="color:#ef4444;font-size:0.85rem;">Error: ' + e.message + '</p>';
             }
