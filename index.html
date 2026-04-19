@@ -2714,7 +2714,7 @@
                     html += '<div style="font-size:0.75rem;color:#94a3b8;">' + preview + '...</div></div>';
                 });
                 html += '</div>';
-                html += '<div id="aria-content-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;padding:20px;overflow-y:auto;"><div id="aria-modal-inner" style="max-width:600px;margin:20px auto;background:#111927;border:1px solid #1E2D42;border-radius:16px;padding:24px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3 id="aria-modal-title" style="margin:0;color:#fff;font-size:16px;"></h3><span id="aria-modal-close" style="cursor:pointer;font-size:20px;color:#94a3b8;">&times;</span></div><div id="aria-modal-body" style="color:#cbd5e1;font-size:0.85rem;line-height:1.7;white-space:pre-wrap;"></div><div style="display:flex;gap:10px;margin-top:16px;"><button id="aria-approve-btn" style="flex:1;padding:10px;background:#22C55E;color:#000;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Approve</button><button id="aria-reject-btn" style="flex:1;padding:10px;background:transparent;border:1px solid #ef4444;color:#ef4444;border-radius:8px;cursor:pointer;font-size:13px;">Reject</button></div><div id="aria-result" style="margin-top:10px;display:none;padding:10px;border-radius:8px;font-size:13px;text-align:center;"></div></div></div>';
+                html += '<div id="aria-content-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;padding:20px;overflow-y:auto;"><div id="aria-modal-inner" style="max-width:600px;margin:20px auto;background:#111927;border:1px solid #1E2D42;border-radius:16px;padding:24px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><h3 id="aria-modal-title" style="margin:0;color:#fff;font-size:16px;"></h3><span id="aria-modal-close" style="cursor:pointer;font-size:20px;color:#94a3b8;">&times;</span></div><div id="aria-modal-body" style="color:#cbd5e1;font-size:0.85rem;line-height:1.7;white-space:pre-wrap;"></div><div style="display:flex;gap:10px;margin-top:16px;"><div id="aria-preview" style="display:none;margin-top:16px;border-top:1px solid #1e293b;padding-top:16px;"><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Preview Post</div><div id="aria-preview-box" style="background:#0a0f1e;border:1px solid #1e293b;border-radius:12px;overflow:hidden;max-width:380px;"><div style="display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #1e293b;"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#22C55E,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;">A</div><div><div style="color:#f1f5f9;font-size:13px;font-weight:600;">Aria</div><div style="color:#64748b;font-size:11px;">AI Influencer</div></div><div id="aria-preview-platform" style="margin-left:auto;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;background:rgba(225,48,108,0.2);color:#E1306C;">IG Post</div></div><div id="aria-preview-image" style="width:100%;aspect-ratio:1;background:#111827;display:flex;align-items:center;justify-content:center;color:#1e293b;font-size:13px;text-align:center;padding:20px;"><div style="color:#1e293b"><div style="font-size:32px;margin-bottom:8px;">&#x1F4F7;</div>Visual preview<br><span style="font-size:11px;">(generated after approval)</span></div></div><div style="padding:12px;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><span style="cursor:pointer;font-size:18px;">&#x2665;</span><span style="cursor:pointer;font-size:16px;">&#x1F4AC;</span><span style="cursor:pointer;font-size:16px;">&#x1F4E4;</span></div><div id="aria-preview-caption" style="color:#f1f5f9;font-size:12px;line-height:1.5;"></div><div id="aria-preview-tags" style="color:#64748b;font-size:11px;margin-top:4px;"></div></div></div></div><div style="display:flex;gap:10px;margin-top:16px;"><button id="aria-approve-btn" style="flex:1;padding:10px;background:#22C55E;color:#000;font-weight:600;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Approve</button><button id="aria-reject-btn" style="flex:1;padding:10px;background:transparent;border:1px solid #ef4444;color:#ef4444;border-radius:8px;cursor:pointer;font-size:13px;">Reject</button></div><div id="aria-result style="margin-top:10px;display:none;padding:10px;border-radius:8px;font-size:13px;text-align:center;"></div></div></div>';
                 container.innerHTML = html;
                 document.getElementById("aria-modal-close").onclick = function(){ document.getElementById("aria-content-modal").style.display="none"; };
                 document.getElementById("aria-content-modal").onclick = function(e){ if(e.target===this) this.style.display="none"; };
@@ -2755,6 +2755,34 @@
                 title.textContent = firstLine ? firstLine[1] : fn;
             currentAriaFile = fn;
                 body.textContent = text;
+                // Parse preview
+                var pv = document.getElementById("aria-preview");
+                var captionEl = document.getElementById("aria-preview-caption");
+                var tagsEl = document.getElementById("aria-preview-tags");
+                var platformEl = document.getElementById("aria-preview-platform");
+                pv.style.display = "block";
+                var platMatch = text.match(/\*\*Platform:\*\* (.+)/);
+                if (platMatch) {
+                    var plat = platMatch[1].trim();
+                    var pColors = {"Instagram Post":"#E1306C","Instagram Reels":"#E1306C","Threads":"#006AFF","X":"#fff","Twitter":"#fff"};
+                    platformEl.textContent = plat;
+                    platformEl.style.color = pColors[plat] || "#22C55E";
+                    platformEl.style.background = (pColors[plat] || "#22C55E") + "22";
+                }
+                var capMatch = text.match(/\*\*Caption:\*\*\s*([\s\S]*?)(?=\*\*Hashtags|\*\*Visual|\*\*Hook|\*\*CTA|$)/);
+                if (capMatch) {
+                    var cap = capMatch[1].trim();
+                    if (cap.length > 250) cap = cap.substring(0,250) + "...";
+                    captionEl.textContent = cap;
+                }
+                var hashMatch = text.match(/#\w+/g);
+                if (hashMatch) {
+                    tagsEl.textContent = hashMatch.slice(0,5).join(" ") + (hashMatch.length > 5 ? " +" + (hashMatch.length-5) : "");
+                }
+                var hookMatch = text.match(/\*\*Hook:\*\* (.+)/);
+                if (hookMatch && document.getElementById("aria-preview-image")) {
+                    document.getElementById("aria-preview-image").innerHTML = '<div style="padding:20px;color:#94a3b8;font-size:13px;text-align:center;"><div style="font-size:20px;margin-bottom:6px;">&#x1F525;</div>' + hookMatch[1].trim() + '</div>';
+                }
             } catch (e) {
                 body.textContent = "Gagal memuat konten.";
             }
